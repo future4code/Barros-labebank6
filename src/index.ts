@@ -15,6 +15,12 @@ app.listen(3003, () => {
     console.log("Server is running in http://localhost:3003");
 });
 
+//Retornar todas as contas 
+
+app.get("/users", (req: express.Request, res: express.Response) => {
+    res.status(200).send(accounts)
+})
+
 
 // Criar nova conta
 app.post("/users/createAccount", (req: express.Request, res: express.Response) => {
@@ -102,6 +108,11 @@ app.put("/users/addNewBalance", (req: express.Request, res: express.Response) =>
             throw new Error("Usuário não encontrado");
         } else {
             getUser[0].balance +=body.value
+            getUser[0].statement=[{
+                value: body.value,
+                date: new Date(),
+                description:"Depósito"
+            }]
             res.status(201).send(getUser)
         }
     } catch (error:any) {
@@ -109,3 +120,4 @@ app.put("/users/addNewBalance", (req: express.Request, res: express.Response) =>
         
     }
 })
+

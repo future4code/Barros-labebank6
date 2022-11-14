@@ -8,11 +8,9 @@ export const accounts:accountType[] = [
         cpf: "40598938750",
         birthDate:"21/08/1998",
         balance: 2000,
-        statement: [{
-            value: 600,
-            date: new Date(),
-            description: "Lorem ipsum"
-        }]
+        statement: [
+            {}
+        ]
     },
     {
         id: generateId(30),
