@@ -79,3 +79,33 @@ app.get("/users/balance", (req: express.Request, res: express.Response) => {
         res.status(errorCode).send(error.message)
     }
 })
+
+
+// Atualizar saldo
+
+app.put("/users/addNewBalance", (req: express.Request, res: express.Response) => {
+    let errorCode = 400
+    const body = req.body;
+    try {
+        if (!body.name || !body.cpf || !body.value) {
+            errorCode=400;
+            throw new Error("Preencha os campos corretamente: name, cpf e value");
+        } else if (isNaN(body.value)){
+            errorCode = 400;
+            throw new Error("A propriedade 'value' não é um número");
+        }
+        let getUser = accounts.filter((element) =>{
+            return element.name === body.name && element.cpf === body.cpf
+        })
+        if (getUser.length === 0) {
+            errorCode = 404;
+            throw new Error("Usuário não encontrado");
+        } else {
+            getUser[0].balance +=body.value
+            res.status(201).send(getUser)
+        }
+    } catch (error:any) {
+        res.status(errorCode).send(error.message)
+        
+    }
+})
