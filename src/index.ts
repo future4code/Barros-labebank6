@@ -130,12 +130,17 @@ app.post("/users/payment", (req: express.Request, res: express.Response) => {
     let month = today.getMonth() + 1
     let year = today.getFullYear()
     try {
-        const query = req.query.cpf
+        const query = req.query.cpf as string
         const body = req.body
         let date = new Date(`${year}/${month}/${day}`)
         if (!query) {
             errorCode = 406;
             throw new Error("Informe o cpf via query");
+        }
+        if (query.length < 11) {
+            errorCode = 400
+            throw new Error("Cpf deve conter 11 caracteres");
+            
         }
         if (!body.value || !body.description) {
             errorCode = 400
@@ -183,8 +188,8 @@ app.post("/users/payment", (req: express.Request, res: express.Response) => {
             }
             
         }
-    } catch (error) {
-        
+    } catch (error:any) {
+        res.status(errorCode).send(error.message)
     }
 })
 
