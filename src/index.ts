@@ -4,6 +4,7 @@ import cors from 'cors'
 import { generateId } from "./functions"
 import { accountType } from "./type"
 import { accounts } from "./data"
+import { builtinModules } from "module"
 
 const app = express()
 
@@ -120,4 +121,71 @@ app.put("/users/addNewBalance", (req: express.Request, res: express.Response) =>
         
     }
 })
+
+
+app.post("/users/payment", (req: express.Request, res: express.Response) => {
+    let errorCode = 400
+    let today = new Date()
+    let day = today.getDate()
+    let month = today.getMonth() + 1
+    let year = today.getFullYear()
+    try {
+        const query = req.query.cpf
+        const body = req.body
+        let date = new Date(`${year}/${month}/${day}`)
+        if (!query) {
+            errorCode = 406;
+            throw new Error("Informe o cpf via query");
+        }
+        if (!body.value || !body.description) {
+            errorCode = 400
+            throw new Error("Informe o valor e descrição via body");
+        }
+        if (!body.date) {
+            body[0].date = date
+        } else if(body.date) {
+            const [dayUser, monthUser, yearUser] = body.date.split("/")
+            let dateToCompare = new Date(`${yearUser}-${monthUser}-${dayUser}`)
+            if (dateToCompare < date) {
+                errorCode = 406;
+                throw new Error("Data informada é invalida");
+            } else {
+                let newStatement = {
+                    value:body.value,
+                    date:body.date,
+                    description:body.description
+                }
+                // modifica o array de dados
+                for (let index = 0; index < accounts.length; index++) {
+                    const element = accounts[index];
+                    if (element.cpf === query) {
+                        element.balance = element.balance - body.value
+                        element.statement.push(newStatement)
+                    }
+                    // checa se o usuário possui dinheiro
+                    if (element.balance < 0) {
+                        errorCode = 406;
+                        element.balance = element.balance + body.value
+                        throw new Error("Você não possui dinheiro para pagar essa conta.");
+                    }
+                    
+                }
+                // ver se o usuário existe
+                const selectUser = accounts.filter((element) => {
+                    return element.cpf === query
+                })
+                if (selectUser.length === 0) {
+                    errorCode = 404;
+                    throw new Error("Usuário não encontrado");
+                } else {
+                    res.status(201).send(accounts)
+                }
+            }
+            
+        }
+    } catch (error) {
+        
+    }
+})
+
 
