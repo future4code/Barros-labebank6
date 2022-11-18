@@ -7,6 +7,7 @@ Neste projeto, desenvolvemos um Sistema Bancário (IWFS - Labebank), onde possui
 * Endpoint para pegar um saldo específico.
 * Endpoint para pagar uma conta.
 * Endpoint para fazer um deposito em uma conta especifica
+* Endpoint para fazer uma transferência entre contas
 
 ## Nome dos integrantes:
 
