@@ -14,4 +14,8 @@ Neste projeto, desenvolvemos um Sistema Bancário (IWFS - Labebank), onde possui
 * Vitória Do Nascimento Galdino
 
 
-## Tecnoligias utilizadas: Typescript, Express, Cors
+## Tecnoligias utilizadas: 
+
+* Typescript
+* Express
+* Cors
