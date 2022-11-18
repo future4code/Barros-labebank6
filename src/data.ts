@@ -23,3 +23,11 @@ export const accounts:accountType[] = [
         ]
     }
 ]
+
+// Transferência entre contas
+
+export type transaction = {
+    value: number
+    date: Date
+    description: string
+}
