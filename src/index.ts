@@ -3,7 +3,7 @@ import express from "express"
 import cors from 'cors'
 import { generateId } from "./functions"
 import { accountType } from "./type"
-import { accounts } from "./data"
+import { accounts, transaction } from "./data"
 import { builtinModules } from "module"
 
 const app = express()
@@ -192,5 +192,80 @@ app.post("/users/payment", (req: express.Request, res: express.Response) => {
         res.status(errorCode).send(error.message)
     }
 })
+
+// Tranferência entre contas
+
+app.post("/accounts/:cpf/:name/transfer", (req: express.Request, res: express.Response) => {
+    try {
+
+        const {cpf, name} = req.params
+        const {nameDestination, cpfDestination} = req.body
+        const {statement} = req.body
+        const {value, description} = statement
+        let {date} = statement
+
+        const [day, month, year] = date.split('/')
+        const dateFormatted = new Date(`${year}-${month}-${day}`)
+
+        if (!cpf || !name || !nameDestination || !cpfDestination) {
+            res.statusCode = 400
+            throw new Error("Não foi possível realizar a tranferência, passou algum dado não preenchido")
+        }
+
+        const accountTypeIndex = accounts.findIndex(accountType => accountType.cpf === cpf && accountType.name.toLowerCase() === name.toLowerCase())
+
+        // Verifica o cpf e o nome se já está cadastrado, se for um valor abaixo de 0, então não existe um cliente com o mesmo cpf, no caso sempre vai retornar -1 se não existir na lista
+        if (accountTypeIndex < 0) {
+            res.statusCode = 404
+            throw new Error("Não foi possível realizar a transferência, não existe um cliente cadastrado com esse CPF e nome")
+        }
+
+        const accountType = accounts[accountTypeIndex]
+
+        // O método Math.abs() retorna o valor absoluto de um número. O valor absoluto de um número é o valor sem sinal.
+        if (Math.abs(value) > accountType.balance) {
+            res.statusCode = 406
+            throw new Error ("Saldo insuficiente")
+        }
+
+        const accountTypeDestinationIndex = accounts.findIndex(accountType => accountType.cpf === cpfDestination)
+
+        // Verifica se o CPF, se for um valor abaixo de 0, então não existe um cliente com o mesmo CPF, no caso sempre vai retornar -1 se não existir na lista.
+        if (accountTypeDestinationIndex < 0) {
+            res.statusCode = 404
+            throw new Error ("Não foi possível realizar a transferência, não existe um cliente cadastrado com esse CPF")
+        }
+
+        const accountTypeDestination = accounts[accountTypeDestinationIndex]
+
+        const newTransaction: transaction = {
+            value: - value,
+            date: new Date(),
+            description: `Tranferência de ${accountType.name} para ${nameDestination}`
+
+        }
+
+        const newTransaction2: transaction = {
+            value: - value,
+            date: new Date(),
+            description: `Tranferência de ${accountType.name} para ${nameDestination}`
+
+        }
+
+        accountType.statement.push(newTransaction)
+        accountTypeDestination.statement.push(newTransaction2)
+
+        res.status(200).send("Tranferência realizada com sucesso")
+    }catch (error:any) {
+        if (res.statusCode == 200) {
+            res.status(500).send(error.message)
+        } else {
+            res.status(res.statusCode).send(error.message)
+        }
+    }
+})
+
+
+
 
 
